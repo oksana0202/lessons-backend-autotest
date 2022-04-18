@@ -2,73 +2,95 @@ package ru.gb;
 
 
 import com.github.javafaker.Faker;
+import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.path.json.JsonPath;
+import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import ru.gb.dto.AddItemToShoppingListRequest;
+import ru.gb.dto.CreateUserRequest;
+import ru.gb.dto.CreateUserResponse;
+import ru.gb.endpoints.SpoonEndpoints;
 import ru.gb.extensions.SpoonApiTest;
+
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 
 @SpoonApiTest
 public class AddToSoppingListTest {
-    private static String userName;
-    private static String hash;
+    private static CreateUserResponse createUserResponse;
+    private static RequestSpecification hashParam;
     private int id;
 
     @BeforeAll
     static void beforeAll() {
         Faker faker = new Faker();
-        JsonPath jsonPath = given()
-                .body("{\n" +
-                        "    \"username\": \"" + faker.funnyName().name() + "\", \n" +
-                        "    \"firstName\": \"" + faker.name().firstName() + "\", \n" +
-                        "    \"lastName\": \"" + faker.name().lastName() + "\", \n" +
-                        "    \"email\": \"" + faker.internet().emailAddress() + "\"\n" +
-                        "}")
-                .post("/users/connect")
+        createUserResponse = given()
+                .body(CreateUserRequest.builder()
+                                .username(faker.funnyName().name())
+                                .firstName(faker.name().firstName())
+                                .lastName(faker.name().lastName())
+                                .email(faker.internet().emailAddress())
+                                .build())
+                .post(SpoonEndpoints.USER_CONNECT.getEndpoint())
+                .prettyPeek()
                 .then()
                 .statusCode(200)
                 .extract()
-                .body()
-                .jsonPath();
-        userName = jsonPath.getString("username");
-        hash = jsonPath.getString("hash");
+                .as(CreateUserResponse.class);
+        hashParam = new RequestSpecBuilder()
+                .addQueryParam("hash",createUserResponse.getHash())
+                .build();
     }
+
 
     @BeforeEach
     void setUp(){
         given()
-                .queryParam("hash", hash)
-                .get("/mealplanner/{username}/shopping-list", userName)
+                .spec(hashParam)
+                .get(SpoonEndpoints.MEALPLANNER_USERNAME_SHOPPING_LIST.getEndpoint(), createUserResponse.getUsername())
                 .then()
                 .statusCode(200);
     }
+    public static Stream<AddItemToShoppingListRequest> shoppingListRequests() {
+        return Stream.of(AddItemToShoppingListRequest.builder()
+                        .item("1 kg cucumbers")
+                        .aisle("Cucumber")
+                        .parse(true)
+                .build(),
+                AddItemToShoppingListRequest.builder()
+                        .item("2 kg tomatos")
+                        .aisle("Tomato")
+                        .parse(true)
+                        .build());
+    }
 
     @ParameterizedTest
-    @CsvSource(value = {"1 kg cucumbers,Cucumber", "2 kg tomatos,Tomato"})
-    void AddToSoppingListTest(String item, String aisle){
+    @MethodSource("shoppingListRequests")
+    void AddToSoppingListTest(AddItemToShoppingListRequest addItemToShoppingListRequest){
 
         given()
-                .queryParam("hash", hash)
-                .body("{\n" +
-                        "   \"item\": \"" + item + "\", \n" +
-                        "   \"aisle\": \"" + aisle + "\", \n"  +
-                        "   \"parse\": true\n" +
-                        "}")
-                .post("/mealplanner/{username}/shopping-list/items", userName);
+                .log()
+                .all()
+                .spec(hashParam)
+                .body(addItemToShoppingListRequest)
+                .post(SpoonEndpoints.MEALPLANNER_USERNAME_SHOPPING_LIST_ITEMS.getEndpoint(), createUserResponse.getUsername())
+                .then()
+                .statusCode(200);
 
-        int id = given()
-                .queryParam("hash", AddToSoppingListTest.hash)
-                .get("/mealplanner/{username}/shopping-list", userName)
-                .prettyPeek()
+        id = given()
+                .spec(hashParam)
+                .get(SpoonEndpoints.MEALPLANNER_USERNAME_SHOPPING_LIST.getEndpoint(), createUserResponse.getUsername())
                 .then()
                 .statusCode(200)
-                .body("aisles.aisle", Matchers.hasItems(aisle))
+                .body("aisles.aisle", Matchers.hasItems(addItemToShoppingListRequest.getAisle()))
                 .extract()
                 .jsonPath()
                 .getInt("aisles.items[0].id[0]");
@@ -76,9 +98,9 @@ public class AddToSoppingListTest {
     @AfterEach
     void tearDown(){
         given()
-                .queryParam("hash", hash)
-                .delete("/mealplanner/{username}/shopping-list/items/{id}", userName, id)
+                .spec(hashParam)
+                .delete(SpoonEndpoints.MEALPLANNER_USERNAME_SHOPPING_LIST_ITEMS_ID.getEndpoint(), createUserResponse.getUsername(), id)
                 .then()
-                .statusCode(404);
+                .statusCode(200);
     }
 }
