@@ -9,14 +9,14 @@
   <version>1.0-SNAPSHOT</version>
 
   <name>lessons-backend-autotests-february</name>
-
   <properties>
     <selenide.version>5.25.1</selenide.version>
     <junit.version>5.8.2</junit.version>
     <aspectj.version>1.9.7</aspectj.version>
     <cucumber.version>7.2.3</cucumber.version>
-    <allure.version>2.16.1</allure.version>
+    <allure.version>2.17.3</allure.version>
     <jackson.version>2.13.2</jackson.version>
+    <retrofit.version>2.9.0</retrofit.version>
   </properties>
 
   <dependencies>
@@ -35,53 +35,57 @@
       <artifactId>assertj-core</artifactId>
       <version>3.22.0</version>
     </dependency>
-
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
-      <version>1.2.6</version>
+      <version>1.2.11</version>
     </dependency>
-
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>converter-jackson</artifactId>
+      <version>${retrofit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>logging-interceptor</artifactId>
+      <version>4.9.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.retrofit2</groupId>
+      <artifactId>retrofit</artifactId>
+      <version>${retrofit.version}</version>
+    </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.6</version>
+      <version>1.2.11</version>
     </dependency>
-
     <dependency>
       <groupId>io.qameta.allure</groupId>
       <artifactId>allure-junit5</artifactId>
       <version>${allure.version}</version>
       <scope>test</scope>
     </dependency>
-    <!--        <dependency>-->
-    <!--            <groupId>com.codeborne</groupId>-->
-    <!--            <artifactId>selenide</artifactId>-->
-    <!--            <version>${selenide.version}</version>-->
-    <!--        </dependency>-->
-    <!--        <dependency>-->
-    <!--            <groupId>io.qameta.allure</groupId>-->
-    <!--            <artifactId>allure-selenide</artifactId>-->
-    <!--            <version>${allure.version}</version>-->
-    <!--        </dependency>-->
-
+    <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-okhttp3</artifactId>
+      <version>${allure.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.aeonbits.owner</groupId>
       <artifactId>owner</artifactId>
       <version>1.0.12</version>
     </dependency>
-
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
-      <version>4.5.1</version>
+      <version>5.0.1</version>
     </dependency>
     <dependency>
       <groupId>io.qameta.allure</groupId>
       <artifactId>allure-rest-assured</artifactId>
       <version>${allure.version}</version>
     </dependency>
-
     <dependency>
       <groupId>com.github.javafaker</groupId>
       <artifactId>javafaker</artifactId>
@@ -109,6 +113,11 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo-java-driver</artifactId>
+      <version>3.12.10</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
