@@ -86,25 +86,14 @@
       <artifactId>javafaker</artifactId>
       <version>1.0.2</version>
     </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>5.8.2</version>
-      <scope>test</scope>
-    </dependency>
+    
     <dependency>
       <groupId>com.typesafe</groupId>
       <artifactId>config</artifactId>
       <version>1.4.2</version>
       <scope>compile</scope>
     </dependency>
-    <dependency>
-      <groupId>ru.gb</groupId>
-      <artifactId>lessons-backend-autotests-february</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-
+    
   </dependencies>
 
   <build>
